@@ -1,0 +1,25 @@
+*.csv
+*.dat
+*.iml
+*.log
+*.out
+*.pid
+*.seed
+*.sublime-*
+*.swo
+*.swp
+*.tgz
+*.xml
+.DS_Store
+.idea
+.project
+.strong-pm
+.env
+coverage
+node_modules
+npm-debug.log
+bower_components
+# Looks like this is npm analytics.
+false/
+bu/
+package-lock.json

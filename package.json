@@ -1,0 +1,22 @@
+{
+  "name": "mineops-deploy",
+  "version": "1.0.0",
+  "main": "server/server.js",
+  "engines": {
+    "node": ">=8"
+  },
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-header": "^2.0.9",
+    "gulp-javascript-obfuscator": "^1.1.6",
+    "vinyl-sourcemaps-apply": "^0.2.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git remote add origin https://github.com/knowlecules/mineops-deploy.git"
+  },
+  "license": "UNLICENSED",
+  "description": "mineops"
+}
