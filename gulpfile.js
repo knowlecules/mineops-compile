@@ -1,6 +1,8 @@
 const gulp = require('gulp');
 const javascriptObfuscator = require('gulp-javascript-obfuscator');
 const header = require('gulp-header');
+const editor = require("gulp-json-editor");
+
 
 const copyright = 
 `/* Copyright (C) 9208-9721 Quebec, Inc - All Rights Reserved
@@ -60,8 +62,14 @@ function hidden(){
   return gulp.src(`${source}/.*`).pipe(gulp.dest(`${deploy}/`));
 }
 
+function dbClean(){
+  var src = gulp.src(`${source}/server/db.json`);
+  var edited = src.pipe(editor({'models': {"AccessToken" : null}}));
+  return edited.pipe(gulp.dest(`${deploy}/server`));
+}
 
-const doCompile = gulp.parallel(server, serverEjs, allJson, common, files, client, visible, hidden);
+const preCompile = gulp.parallel(server, serverEjs, allJson, common, files, client, visible, hidden);
+const doCompile = gulp.series(preCompile, dbClean);
 
 gulp.task(doCompile);
 gulp.task('default', doCompile);
