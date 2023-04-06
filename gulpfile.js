@@ -1,9 +1,10 @@
-const gulp = require('gulp');
+const { parallel, series, src, dest, task} = require('gulp');
 const javascriptObfuscator = require('gulp-javascript-obfuscator');
 const header = require('gulp-header');
 const editor = require("gulp-json-editor");
+const bump = require('gulp-bump');
 
-
+ 
 const copyright = 
 `/* Copyright (C) 9208-9721 Quebec, Inc - All Rights Reserved
 * Unauthorized copying of this file, via any medium is strictly prohibited
@@ -15,14 +16,14 @@ const deploy = '../mineops';
 const source = deploy + '-source'
 
 function copy(folder, extension = "*"){
-  return gulp.src(`${source}/${folder}**/*.${extension}`).pipe(gulp.dest(`${deploy}/${folder}`))  
+  return src(`${source}/${folder}**/*.${extension}`).pipe(dest(`${deploy}/${folder}`))  
 }
 
 function obfuscate(folder){
-  return gulp.src(`${source}/${folder}**/*.js`)
+  return src(`${source}/${folder}**/*.js`)
       .pipe(javascriptObfuscator())
       .pipe(header(copyright))
-      .pipe(gulp.dest(`${deploy}/${folder}`));
+      .pipe(dest(`${deploy}/${folder}`));
 }
 
 function server(){
@@ -55,21 +56,35 @@ function client(){
 }
 
 function visible(){
-  return gulp.src(`${source}/*.*`).pipe(gulp.dest(`${deploy}/`));
+  return src(`${source}/*.*`).pipe(dest(`${deploy}/`));
 }
 
 function hidden(){
-  return gulp.src(`${source}/.*`).pipe(gulp.dest(`${deploy}/`));
+  return src(`${source}/.*`).pipe(dest(`${deploy}/`));
 }
 
 function dbClean(){
-  var src = gulp.src(`${source}/server/db.json`);
-  var edited = src.pipe(editor({'models': {"AccessToken" : null}}));
-  return edited.pipe(gulp.dest(`${deploy}/server`));
+  return src(`${source}/server/db.json`)
+    .pipe(editor({'models': {"AccessToken" : null}}))
+    .pipe(dest(`${deploy}/server`));
 }
 
-const preCompile = gulp.parallel(server, serverEjs, allJson, common, files, client, visible, hidden);
-const doCompile = gulp.series(preCompile, dbClean);
+function doBump() {
+  let importance = (process.argv.join(",").match(/\-\-bump([^,]*)/i) || ["","bad name"])[1].toLowerCase().replace(/\W+/g,""); 
+  if (!/^(major|minor|patch|prerelease)$/.test(importance)) {
+    importance = "patch";
+  }
+  return incVersion(importance);
+}
 
-gulp.task(doCompile);
-gulp.task('default', doCompile);
+function incVersion(importance) {
+  return src([`${source}/package.json`, `${source}/bower.json`], {allowEmpty:true})
+    .pipe(bump({type: importance}))
+    .pipe(dest(`${source}/`));
+}
+
+const preCompile = parallel(server, serverEjs, allJson, common, data, files, client, visible, hidden);
+const doCompile = series(doBump, preCompile, dbClean);  
+
+task(doCompile);
+task('default', doCompile);
